@@ -6,15 +6,15 @@ class GoodType:
     def __repr__(self):
         return f"{self.id} {self.goodtypename}"
 
-
     def __str__(self):
         return f"{self.id} {self.goodtypename}"
 
+
 class Good:
-    def __init__(self, id, goodtypeid, goodname):
+    def __init__(self, id, goodname, goodtypeid):
         self.id = id
-        self.goodtypeid = goodtypeid
         self.goodname = goodname
+        self.goodtypeid = goodtypeid
 
     def __repr__(self):
         return f"{self.id} {self.goodtypeid} {self.goodname}"
@@ -36,6 +36,7 @@ class GoodMarket:
     def __repr__(self):
         return f"{self.id} {self.goodid} {self.marketplaceid} {self.price}"
 
+
 class Market:
     def __init__(self, id, marketname, logo):
         self.id = id
@@ -47,6 +48,7 @@ class Market:
 
     def __str__(self):
         return f"{self.id} {self.marketname} {self.logo}"
+
 
 class MarketPlace:
     def __init__(self, id, marketid, address, latitide, longitude):
@@ -74,10 +76,3 @@ class User:
 
     def __str__(self):
         return f"{self.username} {self.password} {self.role}"
-
-
-
-
-
-
-

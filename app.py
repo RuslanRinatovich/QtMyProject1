@@ -4,7 +4,8 @@ import sys
 import requests
 import sqlite3
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QLabel, QMainWindow,QVBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox
+from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QLabel, QMainWindow, QVBoxLayout, QSpinBox, \
+    QDoubleSpinBox, QComboBox
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap
 from authpage import Ui_Form
@@ -16,6 +17,7 @@ from data.models import User, Good, GoodMarket, GoodType, Market, MarketPlace
 SCREEN_SIZE = [650, 450]
 STEP = 1
 API_KEY = '40d1649f-0493-4b70-98ba-98533de7710b'
+
 
 class MyWidget(QMainWindow, Ui_Form):
     def __init__(self):
@@ -35,7 +37,8 @@ class MyWidget(QMainWindow, Ui_Form):
                 if len(line_edit.text()) == 0:
                     return
             funct(self)
-        return  wrapper
+
+        return wrapper
 
     @check_input
     def auth(self):
@@ -83,8 +86,10 @@ def showdialog():
     retval = msg.exec_()
     print("value of pressed message box button:", retval)
 
+
 def msgbtn(i):
-   print ("Button pressed is:",i.text())
+    print("Button pressed is:", i.text())
+
 
 class SecondForm(QWidget):
     def __init__(self, *args):
@@ -97,33 +102,284 @@ class SecondForm(QWidget):
         self.lbl = QLabel(args[-1], self)
         self.lbl.adjustSize()
 
+
 class MainWindowPage(QMainWindow, Ui_MainWindow):
     def __init__(self, *args):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.statusbarX.showMessage(args[-1])
+        # список магазинов
         self.markets = []
+        # список категорий товаров
         self.goodtypes = []
+        # список товаров
         self.goods = []
+        # список адресов
         self.marketplaces = []
+        # список товаров в магазинах и цены
         self.goodmarkets = []
+        # загрузка списка магазинов в комбобокс
         self.load_markets()
+        # загрузка категорий в комбобокс
         self.load_goodtypes()
-        self.show_map(get_coordinates("Зеленодольск, ул.Карла-Маркса, 7"))
+        # id выбранного товара
+        self.goodid = None
+        # id выбранного магазина
+        self.marketid = None
+        # id выбранного адреса
+        self.marketplaceid = None
+        # id выбранной категории
+        self.goodtypeid = None
+        self.address = None
+
+        # self.show_map(get_ll_span("Зеленодольск, ул.Карла-Маркса, 7"))
         self.ui.cmbGoodTypes.currentTextChanged.connect(self.load_goods)
         self.ui.cmbMarkets.currentTextChanged.connect(self.load_market_places)
+        self.ui.btnSearch.clicked.connect(self.search_goods)
+        self.ui.listWidgetPrices.itemSelectionChanged.connect(self.set_address)
+        self.ui.listWidgetRealMarkets.itemSelectionChanged.connect(self.set_marketplace)
+        self.ui.listWidgetGoods.itemSelectionChanged.connect(self.set_good)
+        self.ui.btnShowMarket.clicked.connect(self.show_market)
+        self.load_goods()
+        self.load_market_places()
 
+
+    def show_market(self):
+        if self.address:
+            self.show_map(get_ll_span(f"Республика Татарстан, г.Зеленодольск, {self.address}"))
+
+    def set_address(self):
+        self.address = None
+        if self.ui.listWidgetPrices.currentItem().text():
+            address = str(self.ui.listWidgetPrices.currentItem().text().split('(')[1:])
+
+            i = address.find(',')
+
+            #address = address.split(',')
+            self.address = address[i + 1:-3]
+            print(self.address)
+
+
+
+    def set_marketplace(self):
+        self.marketplaceid = None
+        # print(self.ui.listWidgetRealMarkets.currentItem().text())
+        if self.ui.listWidgetRealMarkets.currentItem().text():
+            for x in self.marketplaces:
+                if x.address == self.ui.listWidgetRealMarkets.currentItem().text():
+                    self.marketplaceid = x.id
+
+        print(self.marketplaceid)
+
+    def set_good(self):
+        self.goodid = None
+        # print(self.ui.listWidgetRealMarkets.currentItem().text())
+        if self.ui.listWidgetGoods.currentItem().text():
+            for x in self.goods:
+                print(x.goodname)
+                if x.goodname == self.ui.listWidgetGoods.currentItem().text():
+                    self.goodid = x.id
+
+        print(self.goodid)
+
+    def search_goods(self):
+        self.ui.listWidgetPrices.clear()
+        if self.goodid and self.marketplaceid:
+            con = sqlite3.connect("data/my_market_db")
+            # Создание курсора
+            cur = con.cursor()
+            result = cur.execute(f"""
+                        SELECT Goods.Id as GoodId, 
+                        Goods.GoodName,
+                        Markets.Id as MarketId,
+                        Markets.MarketName, 
+                        Marketplaces.Id as MarketPlaceId,
+                        Marketplaces.Address , GoodMarkets.Price   
+                        from Goods
+                        inner join GoodMarkets on goodmarkets.GoodId = goods.Id 
+                        inner join Marketplaces on goodmarkets.MarketPlaceId == Marketplaces.Id 
+                        Inner join markets on markets.Id == Marketplaces.MarketId
+                        where goodmarkets.GoodId = {self.goodid}  and goodmarkets.MarketPlaceId = {self.marketplaceid} 
+                        order by Goods.GoodName
+                        """).fetchall()
+        elif self.goodid and self.marketplaceid is None:
+            if self.marketid is None:
+                con = sqlite3.connect("data/my_market_db")
+                # Создание курсора
+                cur = con.cursor()
+                result = cur.execute(f"""
+                                        SELECT Goods.Id as GoodId, 
+                                        Goods.GoodName,
+                                        Markets.Id as MarketId,
+                                        Markets.MarketName, 
+                                        Marketplaces.Id as MarketPlaceId,
+                                        Marketplaces.Address, 
+                                        GoodMarkets.Price  
+                                        from Goods
+                                        inner join GoodMarkets on goodmarkets.GoodId = goods.Id 
+                                        inner join Marketplaces on goodmarkets.MarketPlaceId == Marketplaces.Id 
+                                        Inner join markets on markets.Id == Marketplaces.MarketId
+                                        where goodmarkets.GoodId = {self.goodid}  
+                                        order by Goods.GoodName
+                                        """).fetchall()
+            else:
+                con = sqlite3.connect("data/my_market_db")
+                # Создание курсора
+                cur = con.cursor()
+                result = cur.execute(f"""
+                                SELECT Goods.Id as GoodId, 
+                               Goods.GoodName,
+                                Markets.Id as MarketId,
+                               Markets.MarketName, 
+                              Marketplaces.Id as MarketPlaceId,
+                             Marketplaces.Address, 
+                             GoodMarkets.Price  
+                            from Goods
+                              inner join GoodMarkets on goodmarkets.GoodId = goods.Id 
+                            inner join Marketplaces on goodmarkets.MarketPlaceId == Marketplaces.Id 
+                                Inner join markets on markets.Id == Marketplaces.MarketId
+                       where goodmarkets.GoodId = {self.goodid} and Marketplaces.marketid = {self.marketid}
+                        order by Goods.GoodName
+                        """).fetchall()
+        elif self.goodid is None and self.marketplaceid:
+            if self.goodtypeid is None:
+                con = sqlite3.connect("data/my_market_db")
+                # Создание курсора
+                cur = con.cursor()
+                result = cur.execute(f"""
+                                        SELECT Goods.Id as GoodId, 
+                                        Goods.GoodName,
+                                        Markets.Id as MarketId,
+                                        Markets.MarketName, 
+                                        Marketplaces.Id as MarketPlaceId,
+                                        Marketplaces.Address, 
+                                            GoodMarkets.Price  
+                                        from Goods
+                                        inner join GoodMarkets on goodmarkets.GoodId = goods.Id 
+                                        inner join Marketplaces on goodmarkets.MarketPlaceId == Marketplaces.Id 
+                                        Inner join markets on markets.Id == Marketplaces.MarketId
+                                        where goodmarkets.MarketPlaceId = {self.marketplaceid} 
+                                        order by Goods.GoodName
+                                        """).fetchall()
+            else:
+                con = sqlite3.connect("data/my_market_db")
+                # Создание курсора
+                cur = con.cursor()
+                result = cur.execute(f"""
+                SELECT Goods.Id as GoodId, 
+                Goods.GoodName,
+                Markets.Id as MarketId,
+                  Markets.MarketName, 
+                  Marketplaces.Id as MarketPlaceId,
+                    Marketplaces.Address, 
+                     GoodMarkets.Price  
+                   from Goods
+                    inner join GoodMarkets on goodmarkets.GoodId = goods.Id 
+                        inner join Marketplaces on goodmarkets.MarketPlaceId == Marketplaces.Id 
+                        Inner join markets on markets.Id == Marketplaces.MarketId
+                    where goodmarkets.MarketPlaceId = {self.marketplaceid} 
+                    and goods.goodtypeid = {self.goodtypeid} 
+                            order by Goods.GoodName
+                                    """).fetchall()
+        else:
+            if self.goodtypeid is None and self.marketid is None:
+                con = sqlite3.connect("data/my_market_db")
+                # Создание курсора
+                cur = con.cursor()
+                result = cur.execute("""
+                SELECT Goods.Id as GoodId, 
+                Goods.GoodName,
+                Markets.Id as MarketId,
+                Markets.MarketName, 
+                Marketplaces.Id as MarketPlaceId,
+                Marketplaces.Address, 
+                GoodMarkets.Price 
+                from Goods
+                inner join GoodMarkets on goodmarkets.GoodId = goods.Id 
+                inner join Marketplaces on goodmarkets.MarketPlaceId == Marketplaces.Id 
+                Inner join markets on markets.Id == Marketplaces.MarketId
+                order by Goods.GoodName
+                """).fetchall()
+            elif self.goodtypeid and self.marketid is None:
+                con = sqlite3.connect("data/my_market_db")
+                # Создание курсора
+                cur = con.cursor()
+                result = cur.execute(f"""
+                                SELECT Goods.Id as GoodId, 
+                                Goods.GoodName,
+                                Markets.Id as MarketId,
+                                Markets.MarketName, 
+                                Marketplaces.Id as MarketPlaceId,
+                                Marketplaces.Address, 
+                                GoodMarkets.Price 
+                                from Goods
+                                inner join GoodMarkets on goodmarkets.GoodId = goods.Id 
+                                inner join Marketplaces on goodmarkets.MarketPlaceId == Marketplaces.Id 
+                                Inner join markets on markets.Id == Marketplaces.MarketId
+                                where goods.goodtypeid = {self.goodtypeid} 
+                                order by Goods.GoodName
+                                """).fetchall()
+            elif self.goodtypeid is None and self.marketid:
+                con = sqlite3.connect("data/my_market_db")
+                # Создание курсора
+                cur = con.cursor()
+                result = cur.execute(f"""
+                                SELECT Goods.Id as GoodId, 
+                                Goods.GoodName,
+                                Markets.Id as MarketId,
+                                Markets.MarketName, 
+                                Marketplaces.Id as MarketPlaceId,
+                                Marketplaces.Address, 
+                                GoodMarkets.Price 
+                                from Goods
+                                inner join GoodMarkets on goodmarkets.GoodId = goods.Id 
+                                inner join Marketplaces on goodmarkets.MarketPlaceId == Marketplaces.Id 
+                                Inner join markets on markets.Id == Marketplaces.MarketId
+                                where Marketplaces.MarketId = {self.marketid}  
+                                order by Goods.GoodName
+                                """).fetchall()
+            else:
+                con = sqlite3.connect("data/my_market_db")
+                # Создание курсора
+                cur = con.cursor()
+                result = cur.execute(f"""
+                                                SELECT Goods.Id as GoodId, 
+                                                Goods.GoodName,
+                                                Markets.Id as MarketId,
+                                                Markets.MarketName, 
+                                                Marketplaces.Id as MarketPlaceId,
+                                                Marketplaces.Address, 
+                                                GoodMarkets.Price 
+                                                from Goods
+                                                inner join GoodMarkets on goodmarkets.GoodId = goods.Id 
+                                                inner join Marketplaces on goodmarkets.MarketPlaceId == Marketplaces.Id 
+                                                Inner join markets on markets.Id == Marketplaces.MarketId
+                                                where goods.goodtypeid = {self.goodtypeid} and Marketplaces.MarketId = {self.marketid}  
+                                                order by Goods.GoodName
+                                                """).fetchall()
+
+
+        for elem in result:
+            self.ui.listWidgetPrices.addItem(f' {elem[1]} {elem[6]} руб. ({elem[3]}, {elem[5]})')
+            print(elem)
+            # market = Market(elem[0], elem[1], elem[2])
+            # self.markets.append(market)
+
+        # print(self.markets)
+
+        con.close()
 
     # список магазинов
     def load_markets(self):
+        self.marketplaceid = None
         con = sqlite3.connect("data/my_market_db")
         # Создание курсора
         cur = con.cursor()
 
         # Выполнение запроса и получение всех результатов
         result = cur.execute("SELECT * FROM markets").fetchall()
-        #g = Market(0, 'Все', '1')
+        # g = Market(0, 'Все', '1')
         self.ui.cmbMarkets.addItem('Все')
         # Вывод результатов на экран
         for elem in result:
@@ -137,6 +393,7 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
 
     # список типов продуктов
     def load_goodtypes(self):
+        self.goodtypes = []
         con = sqlite3.connect("data/my_market_db")
         # Создание курсора
         cur = con.cursor()
@@ -149,14 +406,16 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         # Вывод результатов на экран
         for elem in result:
             self.ui.cmbGoodTypes.addItem(elem[1])
-            item = GoodType(elem[0],elem[1])
+            item = GoodType(elem[0], elem[1])
             self.goodtypes.append(item)
-
 
         con.close()
 
     # список продуктов
     def load_goods(self):
+        self.goodid = None
+        self.goodtypeid = None
+        self.goods = []
         self.ui.listWidgetGoods.clear()
         con = sqlite3.connect("data/my_market_db")
         type = self.ui.cmbGoodTypes.currentText()
@@ -166,6 +425,7 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         if type == 'Все':
             # Выполнение запроса и получение всех результатов
             result = cur.execute("SELECT * FROM goods").fetchall()
+
         else:
             typek = 0
             for x in self.goodtypes:
@@ -173,20 +433,21 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
                     typek = x.id
             print(typek)
             result = []
+            self.goodtypeid = typek
             result = cur.execute(f'SELECT * FROM goods where goodtypeid = {typek}')
-            for x in result:
-                item = Good(x[0], x[1], x[2])
-                self.goods.append(item)
-                self.ui.listWidgetGoods.addItem(x[1])
 
+        for x in result:
+            item = Good(x[0], x[1], x[2])
+            self.goods.append(item)
+            self.ui.listWidgetGoods.addItem(x[1])
+        print(self.goods)
         # # Вывод результатов на экран
         #     for elem in result:
-
-
 
         con.close()
 
     def load_market_places(self):
+        self.marketplaceid = None
         self.ui.listWidgetRealMarkets.clear()
         con = sqlite3.connect("data/my_market_db")
         type = self.ui.cmbMarkets.currentText()
@@ -196,14 +457,15 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         if type == 'Все':
             # Выполнение запроса и получение всех результатов
             result = cur.execute("SELECT * FROM marketplaces").fetchall()
+            self.marketid = None
         else:
             typek = 0
             for x in self.markets:
                 if type == x.marketname:
                     typek = x.id
             print(typek)
+            self.marketid = typek
             result = cur.execute(f'SELECT * FROM marketplaces where MarketId = {typek}')
-
 
         for x in result:
             item = MarketPlace(x[0], x[1], x[2], x[3], x[4])
@@ -214,9 +476,6 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         #     for elem in result:
 
         con.close()
-
-
-
 
     def keyPressEvent(self, event):
         if (event.key() == 16777238):
@@ -233,21 +492,22 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
             self.spinbox_longitude.setValue(longitude - step)
         if (event.key() == 16777236):
             self.spinbox_longitude.setValue(longitude + step)
-        #print("pressed key " + str(event.key()))
+        # print("pressed key " + str(event.key()))
 
     def show_map(self, coords):
-        if len(coords) == 1:
+        if len(coords) == 2:
             ll = coords
             print(ll)
-        # if ll[0]:
-        #     self.spinbox_longitude.setValue(ll[0])
-        #     self.spinbox_lattitude.setValue(ll[1])
+            # if ll[0]:
+            #     self.spinbox_longitude.setValue(ll[0])
+            #     self.spinbox_lattitude.setValue(ll[1])
             z = self.ui.spinBoxScale.value()
             if os._exists("map.png"):
                 os.remove("map.png")
             map = return_map(ll, "map", SCREEN_SIZE, z)
         else:
-            ll, spn = coords
+            ll, spn = coords[:2], coords[2:]
+            print(ll, spn)
             if os._exists("map.png"):
                 os.remove("map.png")
             map = return_map(ll, "map", SCREEN_SIZE, z=13, spn=spn)
@@ -257,7 +517,6 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         # Если картинки нет, то QPixmap будет пустым,
         # а исключения не будет
         self.ui.image.setPixmap(self.pixmap)
-
 
 
 def geocode(address):
@@ -289,13 +548,17 @@ def geocode(address):
 def return_map(ll=None, map_type="map", size=(450, 450), z=13, spn=None):
     s = ','.join([str(x) for x in size])
     if ll and spn:
-        map_request = f"http://static-maps.yandex.ru/1.x/?ll={ll[0]},{ll[1]}&l={map_type}&size={s}&spn={spn}"
+        map_request = f"http://static-maps.yandex.ru/1.x/?ll={ll[0]},{ll[1]}&spn={spn[0]},{spn[1]}&l={map_type}&size={s}&pt={ll[0]},{ll[1]},pm2gnm"
+        print(1)
     elif ll and spn == None:
-        map_request = f"http://static-maps.yandex.ru/1.x/?ll={ll[0]},{ll[1]}&l={map_type}&size={s}&z={z}"
+        print(2)
+        map_request = f"http://static-maps.yandex.ru/1.x/?ll={ll[0]},{ll[1]}&l={map_type}&size={s}&z={z}&pt={ll[0]},{ll[1]},pm2gnm"
     elif ll == None and spn:
-        map_request = f"http://static-maps.yandex.ru/1.x/?l={map_type}&size={s}&spn={spn}"
+        print(3)
+        map_request = f"http://static-maps.yandex.ru/1.x/?l={map_type}&spn={spn[0]},{spn[1]}&size={s}&pt={ll[0]},{ll[1]},pm2gnm"
     else:
-        map_request = f"http://static-maps.yandex.ru/1.x/?l={map_type}&size={s}&z={z}"
+        print(4)
+        map_request = f"http://static-maps.yandex.ru/1.x/?l={map_type}&size={s}&z={z}&pt={ll[0]},{ll[1]},pm2gnm"
 
     response = requests.get(map_request)
 
@@ -329,6 +592,7 @@ def get_coordinates(address):
     toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
     return float(toponym_longitude), float(toponym_lattitude)
 
+
 # Получаем параметры объекта для рисования карты вокруг него.
 def get_ll_span(address):
     toponym = geocode(address)
@@ -357,7 +621,7 @@ def get_ll_span(address):
     # Собираем размеры в параметр span
     span = f"{dx},{dy}"
 
-    return ll, span
+    return float(toponym_longitude), float(toponym_lattitude), dx, dy
 
 
 # Находим ближайшие к заданной точке объекты заданного типа.
@@ -393,7 +657,6 @@ def main():
     ex.show()
     sys.exit(app.exec_())
 
+
 if __name__ == '__main__':
     main()
-
-
