@@ -236,15 +236,21 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         #print("pressed key " + str(event.key()))
 
     def show_map(self, coords):
-        ll = coords
-        print(ll)
+        if len(coords) == 1:
+            ll = coords
+            print(ll)
         # if ll[0]:
         #     self.spinbox_longitude.setValue(ll[0])
         #     self.spinbox_lattitude.setValue(ll[1])
-        z = self.ui.spinBoxScale.value()
-        if os._exists("map.png"):
-            os.remove("map.png")
-        map = return_map(ll, "map", SCREEN_SIZE, z)
+            z = self.ui.spinBoxScale.value()
+            if os._exists("map.png"):
+                os.remove("map.png")
+            map = return_map(ll, "map", SCREEN_SIZE, z)
+        else:
+            ll, spn = coords
+            if os._exists("map.png"):
+                os.remove("map.png")
+            map = return_map(ll, "map", SCREEN_SIZE, z=13, spn=spn)
         # Отображаем содержимое QPixmap в объекте QLabel
         ## Изображение
         self.pixmap = QPixmap(map)
@@ -280,10 +286,14 @@ def geocode(address):
     return features[0]["GeoObject"] if features else None
 
 
-def return_map(ll=None, map_type="map", size=(450, 450), z=13):
+def return_map(ll=None, map_type="map", size=(450, 450), z=13, spn=None):
     s = ','.join([str(x) for x in size])
-    if ll:
+    if ll and spn:
+        map_request = f"http://static-maps.yandex.ru/1.x/?ll={ll[0]},{ll[1]}&l={map_type}&size={s}&spn={spn}"
+    elif ll and spn == None:
         map_request = f"http://static-maps.yandex.ru/1.x/?ll={ll[0]},{ll[1]}&l={map_type}&size={s}&z={z}"
+    elif ll == None and spn:
+        map_request = f"http://static-maps.yandex.ru/1.x/?l={map_type}&size={s}&spn={spn}"
     else:
         map_request = f"http://static-maps.yandex.ru/1.x/?l={map_type}&size={s}&z={z}"
 
@@ -319,6 +329,61 @@ def get_coordinates(address):
     toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
     return float(toponym_longitude), float(toponym_lattitude)
 
+# Получаем параметры объекта для рисования карты вокруг него.
+def get_ll_span(address):
+    toponym = geocode(address)
+    if not toponym:
+        return (None, None)
+
+    # Координаты центра топонима:
+    toponym_coodrinates = toponym["Point"]["pos"]
+    # Долгота и Широта :
+    toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
+
+    # Собираем координаты в параметр ll
+    ll = ",".join([toponym_longitude, toponym_lattitude])
+
+    # Рамка вокруг объекта:
+    envelope = toponym["boundedBy"]["Envelope"]
+
+    # левая, нижняя, правая и верхняя границы из координат углов:
+    l, b = envelope["lowerCorner"].split(" ")
+    r, t = envelope["upperCorner"].split(" ")
+
+    # Вычисляем полуразмеры по вертикали и горизонтали
+    dx = abs(float(l) - float(r)) / 2.0
+    dy = abs(float(t) - float(b)) / 2.0
+
+    # Собираем размеры в параметр span
+    span = f"{dx},{dy}"
+
+    return ll, span
+
+
+# Находим ближайшие к заданной точке объекты заданного типа.
+def get_nearest_object(point, kind):
+    ll = "{0},{1}".format(point[0], point[1])
+    geocoder_request = f"http://geocode-maps.yandex.ru/1.x/"
+    geocoder_params = {
+        "apikey": API_KEY,
+        "geocode": ll,
+        "format": "json"}
+    if kind:
+        geocoder_params['kind'] = kind
+    # Выполняем запрос к геокодеру, анализируем ответ.
+    response = requests.get(geocoder_request, params=geocoder_params)
+    if not response:
+        raise RuntimeError(
+            f"""Ошибка выполнения запроса:
+            {geocoder_request}
+            Http статус: {response.status_code,} ({response.reason})""")
+
+    # Преобразуем ответ в json-объект
+    json_response = response.json()
+
+    # Получаем первый топоним из ответа геокодера.
+    features = json_response["response"]["GeoObjectCollection"]["featureMember"]
+    return features[0]["GeoObject"]["name"] if features else None
 
 
 def main():
