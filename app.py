@@ -549,6 +549,8 @@ class GoodWindow(QDialog, Ui_GoodDialog):
         self.tableWidgetGoods.itemClicked.connect(self.get_item)
         self.cmbGoodType.currentTextChanged.connect(self.set_goodtypeid)
         self.btnUpdate.clicked.connect(self.update_result)
+        self.btnSave.clicked.connect(self.save_results)
+        self.btnDelete.clicked.connect(self.delete_result)
 
         # список продуктов
     def set_goodtypeid(self):
@@ -619,20 +621,66 @@ class GoodWindow(QDialog, Ui_GoodDialog):
         cur = con.cursor()
         if (self.lineEditGoodName.text()) and self.goodtypeid and self.goodid:
             print(self.lineEditGoodName.text(), self.goodtypeid, self.goodid )
-            que = f"""UPDATE goods SET GoodName={self.lineEditGoodName.text()}, 
-                          GoodTypeId={self.goodtypeid} WHERe Id= {self.goodid}"""
+            que = f"""UPDATE goods SET GoodName='{self.lineEditGoodName.text()}', 
+                          GoodTypeId={self.goodtypeid} WHERE Id= {self.goodid};"""
             cur.execute(que)
             con.commit()
-            print('saved')
+            print('updated')
             self.load_data()
+            con.close()
         else:
             return
 
-    def item_changed(self, item):
-        pass
+    def delete_result(self, item):
+
+
+        if self.goodid:
+            print(self.lineEditGoodName.text(), self.goodtypeid)
+            ret = QMessageBox.question(self, '', "Вы действительно хотите удалить запись?", QMessageBox.Yes | QMessageBox.No)
+
+            if ret == QMessageBox.Yes:
+                con = sqlite3.connect("data/my_market_db")
+                cur = con.cursor()
+                result = int(list(cur.execute(
+                    f"Select Count(GoodId) from GoodMarkets where GoodMarkets.GoodId = {self.goodid}"))[0][
+                                 0])
+                if result > 0:
+                    QMessageBox.critical(self, 'Ошибка', "есть связанные записи")
+                    return
+
+
+                que = f"""DELETE FROM Goods WHERE Id= {self.goodid};"""
+                cur.execute(que)
+                con.commit()
+                print('deleted')
+                con.close()
+                self.load_data()
+            else:
+                return
+
 
     def save_results(self):
-        pass
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+
+        if (self.lineEditGoodName.text()) and self.goodtypeid:
+            print(self.lineEditGoodName.text(), self.goodtypeid)
+            goodname = self.lineEditGoodName.text()
+            result = int(list(cur.execute(f"Select Count(GoodName) from Goods where goods.GoodName = '{self.lineEditGoodName.text()}'"))[0][0])
+            if result > 0:
+                QMessageBox.about(self, 'Ошибка', "Такой товар уже существует")
+                return
+            cur = con.cursor()
+            que = f"""INSERT INTO Goods (goodname, goodtypeid) 
+                           VALUES ('{goodname}',{self.goodtypeid})"""
+            cur.execute(que)
+            con.commit()
+            print('inserted')
+            con.close()
+            self.load_data()
+        else:
+            con.close()
+            return
 
 
 def geocode(address):
@@ -773,7 +821,7 @@ def get_nearest_object(point, kind):
 def main():
     app = QApplication(sys.argv)
     ex = MyWidget()
-    apply_stylesheet(app, theme='dark_cyan.xml')
+    #apply_stylesheet(app, theme='dark_cyan.xml')
     ex.show()
     sys.exit(app.exec_())
 

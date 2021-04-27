@@ -39,7 +39,7 @@ class Ui_GoodDialog(object):
     def retranslateUi(self, GoodDialog):
         _translate = QtCore.QCoreApplication.translate
         GoodDialog.setWindowTitle(_translate("GoodDialog", "Dialog"))
-        self.btnSave.setText(_translate("GoodDialog", "Сохранить"))
+        self.btnSave.setText(_translate("GoodDialog", "Добавить"))
         self.btnUpdate.setText(_translate("GoodDialog", "Изменить"))
         self.btnDelete.setText(_translate("GoodDialog", "Удалить"))
 
