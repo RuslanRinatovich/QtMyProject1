@@ -51,18 +51,17 @@ class Market:
 
 
 class MarketPlace:
-    def __init__(self, id, marketid, address, latitide, longitude):
+    def __init__(self, id, marketid, address):
         self.id = id
         self.marketid = marketid
         self.address = address
-        self.latitide = latitide
-        self.longitude = longitude
+
 
     def __repr__(self):
-        return f"{self.id} {self.marketid} {self.address} {self.latitide} {self.longitude}"
+        return f"{self.id} {self.marketid} {self.address} "
 
     def __repr__(self):
-        return f"{self.id} {self.marketid} {self.address} {self.latitide} {self.longitude}"
+        return f"{self.id} {self.marketid} {self.address} "
 
 
 class User:

@@ -92,10 +92,16 @@ class Ui_MainWindow(object):
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 21))
         self.menubar.setObjectName("menubar")
+        self.mnuGoods = QtWidgets.QMenu(self.menubar)
+        self.mnuGoods.setObjectName("mnuGoods")
+        self.mnuMarkets = QtWidgets.QMenu(self.menubar)
+        self.mnuMarkets.setObjectName("mnuMarkets")
         MainWindow.setMenuBar(self.menubar)
         self.statusbarX = QtWidgets.QStatusBar(MainWindow)
         self.statusbarX.setObjectName("statusbarX")
         MainWindow.setStatusBar(self.statusbarX)
+        self.menubar.addAction(self.mnuGoods.menuAction())
+        self.menubar.addAction(self.mnuMarkets.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -110,4 +116,6 @@ class Ui_MainWindow(object):
         self.btnShowMarket.setText(_translate("MainWindow", "Показать на карте"))
         self.label.setText(_translate("MainWindow", "Масштаб"))
         self.image.setText(_translate("MainWindow", "TextLabel"))
+        self.mnuGoods.setTitle(_translate("MainWindow", "Товары"))
+        self.mnuMarkets.setTitle(_translate("MainWindow", "Магазины"))
 

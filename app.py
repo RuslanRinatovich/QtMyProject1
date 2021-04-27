@@ -5,12 +5,13 @@ import requests
 import sqlite3
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QLabel, QMainWindow, QVBoxLayout, QSpinBox, \
-    QDoubleSpinBox, QComboBox
+    QDoubleSpinBox, QComboBox, QDialog, QAction, QTableWidgetItem
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap
 from authpage import Ui_Form
 from check_db import *
 from mainwindowpage import Ui_MainWindow
+from goodwindow import Ui_GoodDialog
 from qt_material import apply_stylesheet
 from data.models import User, Good, GoodMarket, GoodType, Market, MarketPlace
 
@@ -141,13 +142,26 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         self.ui.listWidgetRealMarkets.itemSelectionChanged.connect(self.set_marketplace)
         self.ui.listWidgetGoods.itemSelectionChanged.connect(self.set_good)
         self.ui.btnShowMarket.clicked.connect(self.show_market)
+        #self.ui.mnuGoods.triggered.connect(self.open_good_window)
+        openGoodsAction = QAction(self)
+        openGoodsAction.triggered.connect(self.open_good_window)
+
+        self.ui.mnuGoods.addAction(openGoodsAction)
         self.load_goods()
         self.load_market_places()
+        #self.open_good_window()
 
+
+    def open_good_window(self):
+        self.new_form = GoodWindow()
+        self.new_form.show()
 
     def show_market(self):
+        # self.new_form = GoodWindow()
+        # self.new_form.show()
+        #
         if self.address:
-            self.show_map(get_ll_span(f"Республика Татарстан, г.Зеленодольск, {self.address}"))
+              self.show_map(get_ll_span(f"Республика Татарстан, г.Зеленодольск, {self.address}"))
 
     def set_address(self):
         self.address = None
@@ -468,7 +482,7 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
             result = cur.execute(f'SELECT * FROM marketplaces where MarketId = {typek}')
 
         for x in result:
-            item = MarketPlace(x[0], x[1], x[2], x[3], x[4])
+            item = MarketPlace(x[0], x[1], x[2])
             self.marketplaces.append(item)
             self.ui.listWidgetRealMarkets.addItem(x[2])
 
@@ -517,6 +531,108 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         # Если картинки нет, то QPixmap будет пустым,
         # а исключения не будет
         self.ui.image.setPixmap(self.pixmap)
+
+
+class GoodWindow(QDialog, Ui_GoodDialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.modified = {}
+        self.goodtypes = {}
+        self.setModal(True)
+        self.titles = None
+        self.goodid = None
+        self.goodtypeid = None
+        self.load_data()
+        self.load_goodtypes()
+        self.tableWidgetGoods.itemSelectionChanged.connect(self.get_item)
+        self.tableWidgetGoods.itemClicked.connect(self.get_item)
+        self.cmbGoodType.currentTextChanged.connect(self.set_goodtypeid)
+        self.btnUpdate.clicked.connect(self.update_result)
+
+        # список продуктов
+    def set_goodtypeid(self):
+        self.goodtypeid = None
+        if self.goodtypes:
+            type = self.cmbGoodType.currentText()
+            self.goodtypeid = self.goodtypes.get(type, None)
+
+
+
+        # список типов продуктов
+    def load_goodtypes(self):
+
+        con = sqlite3.connect("data/my_market_db")
+            # Создание курсора
+        cur = con.cursor()
+
+            # Выполнение запроса и получение всех результатов
+        result = cur.execute("SELECT * FROM goodtypes").fetchall()
+
+            # Вывод результатов на экран
+        for elem in result:
+            self.cmbGoodType.addItem(elem[1])
+            self.goodtypes[elem[1]] = elem[0]
+
+        con.close()
+
+
+    def get_item(self):
+        self.goodid = None
+        k = self.tableWidgetGoods.currentItem().row()
+        if k:
+            self.goodid = int(self.tableWidgetGoods.item(k, 0).text())
+            self.lineEditGoodName.setText(self.tableWidgetGoods.item(k, 1).text())
+            self.cmbGoodType.setCurrentText(self.tableWidgetGoods.item(k, 2).text())
+        print(self.tableWidgetGoods.item(k, 0).text(), self.tableWidgetGoods.item(k, 1).text(), self.tableWidgetGoods.item(k, 2).text())
+
+    def load_data(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+
+        result = cur.execute("""SELECT Goods.Id as id, Goods.GoodName as Название, GoodTypes.GoodTypeName as Категория 
+        from goods inner join GoodTypes on goods.GoodTypeId = goodtypes.Id """).fetchall()
+
+
+        self.tableWidgetGoods.setRowCount(len(result))
+
+        self.tableWidgetGoods.setColumnCount(len(result[0]))
+        self.titles = [description[0] for description in cur.description]
+        self.tableWidgetGoods.setHorizontalHeaderLabels(self.titles)
+
+        # Заполнили таблицу полученными элементами
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                print(val, end='\t')
+                item = QTableWidgetItem(str(val))
+                item.setFlags(QtCore.Qt.ItemIsEnabled)
+                self.tableWidgetGoods.setItem(i, j, item)
+            print()
+        self.modified = {}
+
+        con.close()
+
+
+
+    def update_result(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+        if (self.lineEditGoodName.text()) and self.goodtypeid and self.goodid:
+            print(self.lineEditGoodName.text(), self.goodtypeid, self.goodid )
+            que = f"""UPDATE goods SET GoodName={self.lineEditGoodName.text()}, 
+                          GoodTypeId={self.goodtypeid} WHERe Id= {self.goodid}"""
+            cur.execute(que)
+            con.commit()
+            print('saved')
+            self.load_data()
+        else:
+            return
+
+    def item_changed(self, item):
+        pass
+
+    def save_results(self):
+        pass
 
 
 def geocode(address):
@@ -648,6 +764,10 @@ def get_nearest_object(point, kind):
     # Получаем первый топоним из ответа геокодера.
     features = json_response["response"]["GeoObjectCollection"]["featureMember"]
     return features[0]["GeoObject"]["name"] if features else None
+
+
+
+
 
 
 def main():
