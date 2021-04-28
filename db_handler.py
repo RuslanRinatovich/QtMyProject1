@@ -9,8 +9,11 @@ def login(login, password, signal):
         cur.execute(f'SELECT * from users where username ="{login}";')
         value = cur.fetchall()
 
-        if value != [] and check_password_hash(value[0][1], password ):
-            signal.emit('1')
+        if value != [] and check_password_hash(value[0][1], password):
+            if value[0][2] == 'admin':
+                signal.emit('1')
+            else:
+                signal.emit('-1')
         else:
             signal.emit('2')
 

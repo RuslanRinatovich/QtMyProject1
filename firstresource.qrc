@@ -1,5 +1,0 @@
-<RCC>
-  <qresource prefix="icons">
-    <file alias="keyico">key.ico</file>
-  </qresource>
-</RCC>
