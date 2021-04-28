@@ -12,6 +12,9 @@ from authpage import Ui_Form
 from check_db import *
 from mainwindowpage import Ui_MainWindow
 from goodwindow import Ui_GoodDialog
+from marketwindow import Ui_MarketDialog
+from goodtypewindow import Ui_GoodTypeDialog
+from marketplacewindow import Ui_MarketPlaceDialog
 from qt_material import apply_stylesheet
 from data.models import User, Good, GoodMarket, GoodType, Market, MarketPlace
 
@@ -142,26 +145,42 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         self.ui.listWidgetRealMarkets.itemSelectionChanged.connect(self.set_marketplace)
         self.ui.listWidgetGoods.itemSelectionChanged.connect(self.set_good)
         self.ui.btnShowMarket.clicked.connect(self.show_market)
-        #self.ui.mnuGoods.triggered.connect(self.open_good_window)
-        openGoodsAction = QAction(self)
+        # self.ui.mnuGoods.triggered.connect(self.open_good_window)
+        openGoodsAction = QAction("Товары", self)
         openGoodsAction.triggered.connect(self.open_good_window)
-
+        openGoodTypesAction = QAction("Категории", self)
+        openGoodTypesAction.triggered.connect(self.open_good_type_window)
         self.ui.mnuGoods.addAction(openGoodsAction)
+        self.ui.mnuGoods.addAction(openGoodTypesAction)
+
+        openMarketsAction = QAction('Магазины', self)
+        openMarketsAction.triggered.connect(self.open_market_window)
+
+        self.ui.mnuMarkets.addAction(openMarketsAction)
         self.load_goods()
         self.load_market_places()
-        #self.open_good_window()
-
+        # self.open_good_window()
 
     def open_good_window(self):
         self.new_form = GoodWindow()
         self.new_form.show()
+
+    def open_good_type_window(self):
+        self.new_form = GoodTypeWindow()
+        self.new_form.show()
+
+    def open_market_window(self):
+        self.new_form = MarketWindow()
+        self.new_form.show()
+
+
 
     def show_market(self):
         # self.new_form = GoodWindow()
         # self.new_form.show()
         #
         if self.address:
-              self.show_map(get_ll_span(f"Республика Татарстан, г.Зеленодольск, {self.address}"))
+            self.show_map(get_ll_span(f"Республика Татарстан, г.Зеленодольск, {self.address}"))
 
     def set_address(self):
         self.address = None
@@ -170,11 +189,9 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
 
             i = address.find(',')
 
-            #address = address.split(',')
+            # address = address.split(',')
             self.address = address[i + 1:-3]
             print(self.address)
-
-
 
     def set_marketplace(self):
         self.marketplaceid = None
@@ -373,7 +390,6 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
                                                 order by Goods.GoodName
                                                 """).fetchall()
 
-
         for elem in result:
             self.ui.listWidgetPrices.addItem(f' {elem[1]} {elem[6]} руб. ({elem[3]}, {elem[5]})')
             print(elem)
@@ -398,7 +414,7 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         # Вывод результатов на экран
         for elem in result:
             self.ui.cmbMarkets.addItem(elem[1])
-            market = Market(elem[0], elem[1], elem[2])
+            market = Market(elem[0], elem[1])
             self.markets.append(market)
 
         print(self.markets)
@@ -553,31 +569,30 @@ class GoodWindow(QDialog, Ui_GoodDialog):
         self.btnDelete.clicked.connect(self.delete_result)
 
         # список продуктов
+
     def set_goodtypeid(self):
         self.goodtypeid = None
         if self.goodtypes:
             type = self.cmbGoodType.currentText()
             self.goodtypeid = self.goodtypes.get(type, None)
 
-
-
         # список типов продуктов
+
     def load_goodtypes(self):
 
         con = sqlite3.connect("data/my_market_db")
-            # Создание курсора
+        # Создание курсора
         cur = con.cursor()
 
-            # Выполнение запроса и получение всех результатов
+        # Выполнение запроса и получение всех результатов
         result = cur.execute("SELECT * FROM goodtypes").fetchall()
 
-            # Вывод результатов на экран
+        # Вывод результатов на экран
         for elem in result:
             self.cmbGoodType.addItem(elem[1])
             self.goodtypes[elem[1]] = elem[0]
 
         con.close()
-
 
     def get_item(self):
         self.goodid = None
@@ -586,7 +601,8 @@ class GoodWindow(QDialog, Ui_GoodDialog):
             self.goodid = int(self.tableWidgetGoods.item(k, 0).text())
             self.lineEditGoodName.setText(self.tableWidgetGoods.item(k, 1).text())
             self.cmbGoodType.setCurrentText(self.tableWidgetGoods.item(k, 2).text())
-        print(self.tableWidgetGoods.item(k, 0).text(), self.tableWidgetGoods.item(k, 1).text(), self.tableWidgetGoods.item(k, 2).text())
+        print(self.tableWidgetGoods.item(k, 0).text(), self.tableWidgetGoods.item(k, 1).text(),
+              self.tableWidgetGoods.item(k, 2).text())
 
     def load_data(self):
         con = sqlite3.connect("data/my_market_db")
@@ -595,13 +611,15 @@ class GoodWindow(QDialog, Ui_GoodDialog):
         result = cur.execute("""SELECT Goods.Id as id, Goods.GoodName as Название, GoodTypes.GoodTypeName as Категория 
         from goods inner join GoodTypes on goods.GoodTypeId = goodtypes.Id """).fetchall()
 
-
         self.tableWidgetGoods.setRowCount(len(result))
 
         self.tableWidgetGoods.setColumnCount(len(result[0]))
         self.titles = [description[0] for description in cur.description]
         self.tableWidgetGoods.setHorizontalHeaderLabels(self.titles)
-
+        headers = self.tableWidgetGoods.horizontalHeader()
+        headers.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        headers.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        headers.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         # Заполнили таблицу полученными элементами
         for i, elem in enumerate(result):
             for j, val in enumerate(elem):
@@ -614,13 +632,11 @@ class GoodWindow(QDialog, Ui_GoodDialog):
 
         con.close()
 
-
-
     def update_result(self):
         con = sqlite3.connect("data/my_market_db")
         cur = con.cursor()
         if (self.lineEditGoodName.text()) and self.goodtypeid and self.goodid:
-            print(self.lineEditGoodName.text(), self.goodtypeid, self.goodid )
+            print(self.lineEditGoodName.text(), self.goodtypeid, self.goodid)
             que = f"""UPDATE goods SET GoodName='{self.lineEditGoodName.text()}', 
                           GoodTypeId={self.goodtypeid} WHERE Id= {self.goodid};"""
             cur.execute(que)
@@ -633,10 +649,10 @@ class GoodWindow(QDialog, Ui_GoodDialog):
 
     def delete_result(self, item):
 
-
         if self.goodid:
             print(self.lineEditGoodName.text(), self.goodtypeid)
-            ret = QMessageBox.question(self, '', "Вы действительно хотите удалить запись?", QMessageBox.Yes | QMessageBox.No)
+            ret = QMessageBox.question(self, '', "Вы действительно хотите удалить запись?",
+                                       QMessageBox.Yes | QMessageBox.No)
 
             if ret == QMessageBox.Yes:
                 con = sqlite3.connect("data/my_market_db")
@@ -648,7 +664,6 @@ class GoodWindow(QDialog, Ui_GoodDialog):
                     QMessageBox.critical(self, 'Ошибка', "есть связанные записи")
                     return
 
-
                 que = f"""DELETE FROM Goods WHERE Id= {self.goodid};"""
                 cur.execute(que)
                 con.commit()
@@ -658,7 +673,6 @@ class GoodWindow(QDialog, Ui_GoodDialog):
             else:
                 return
 
-
     def save_results(self):
         con = sqlite3.connect("data/my_market_db")
         cur = con.cursor()
@@ -666,7 +680,8 @@ class GoodWindow(QDialog, Ui_GoodDialog):
         if (self.lineEditGoodName.text()) and self.goodtypeid:
             print(self.lineEditGoodName.text(), self.goodtypeid)
             goodname = self.lineEditGoodName.text()
-            result = int(list(cur.execute(f"Select Count(GoodName) from Goods where goods.GoodName = '{self.lineEditGoodName.text()}'"))[0][0])
+            result = int(list(cur.execute(
+                f"Select Count(GoodName) from Goods where goods.GoodName = '{self.lineEditGoodName.text()}'"))[0][0])
             if result > 0:
                 QMessageBox.about(self, 'Ошибка', "Такой товар уже существует")
                 return
@@ -681,6 +696,391 @@ class GoodWindow(QDialog, Ui_GoodDialog):
         else:
             con.close()
             return
+
+
+class MarketWindow(QDialog, Ui_MarketDialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.modified = {}
+        self.markets = {}
+        self.setModal(True)
+        self.titles = None
+        self.marketid = None
+        self.load_data()
+        self.tableWidgetMarkets.itemSelectionChanged.connect(self.get_item)
+        self.tableWidgetMarkets.itemClicked.connect(self.get_item)
+        self.btnUpdate.clicked.connect(self.update_result)
+        self.btnSave.clicked.connect(self.save_results)
+        self.btnDelete.clicked.connect(self.delete_result)
+
+    def get_item(self):
+        self.marketid = None
+        k = self.tableWidgetMarkets.currentItem().row()
+        if k:
+            self.marketid = int(self.tableWidgetMarkets.item(k, 0).text())
+            self.lineEditGoodName.setText(self.tableWidgetMarkets.item(k, 1).text())
+        print(self.tableWidgetMarkets.item(k, 0).text(), self.tableWidgetMarkets.item(k, 1).text())
+
+    def load_data(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+
+        result = cur.execute("""SELECT Markets.Id as id, Markets.MarketName as Название From Markets""").fetchall()
+
+        self.tableWidgetMarkets.setRowCount(len(result))
+
+        self.tableWidgetMarkets.setColumnCount(len(result[0]))
+        self.titles = [description[0] for description in cur.description]
+        self.tableWidgetMarkets.setHorizontalHeaderLabels(self.titles)
+        headers = self.tableWidgetMarkets.horizontalHeader()
+        headers.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        headers.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+
+        # Заполнили таблицу полученными элементами
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                print(val, end='\t')
+                item = QTableWidgetItem(str(val))
+                item.setFlags(QtCore.Qt.ItemIsEnabled)
+                self.tableWidgetMarkets.setItem(i, j, item)
+            print()
+        self.modified = {}
+
+        con.close()
+
+    def update_result(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+        if (self.lineEditGoodName.text()) and self.marketid:
+            print(self.lineEditGoodName.text(), self.marketid)
+            que = f"""UPDATE Markets SET MarketName='{self.lineEditGoodName.text()}'
+                           WHERE Id= {self.marketid};"""
+            cur.execute(que)
+            con.commit()
+            print('updated')
+            self.load_data()
+            con.close()
+        else:
+            return
+
+    def delete_result(self):
+
+        if self.marketid:
+            print(self.lineEditGoodName.text(), self.marketid)
+            ret = QMessageBox.question(self, '', "Вы действительно хотите удалить запись?",
+                                       QMessageBox.Yes | QMessageBox.No)
+
+            if ret == QMessageBox.Yes:
+                con = sqlite3.connect("data/my_market_db")
+                cur = con.cursor()
+                result = int(list(cur.execute(
+                    f"Select Count(MarketId) from MarketPlaces where MarketPlaces.MarketId = {self.marketid}"))[0][
+                                 0])
+                if result > 0:
+                    QMessageBox.critical(self, 'Ошибка', "есть связанные записи")
+                    return
+
+                que = f"""DELETE FROM Markets WHERE Id= {self.marketid};"""
+                cur.execute(que)
+                con.commit()
+                print('deleted')
+                con.close()
+                self.load_data()
+            else:
+                return
+
+    def save_results(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+
+        if (self.lineEditGoodName.text()):
+            print(self.lineEditGoodName.text())
+            marketname = self.lineEditGoodName.text()
+            result = int(list(cur.execute(
+                f"Select Count(MarketName) from Markets where Markets.MarketName = '{self.lineEditGoodName.text()}'"))[0][0])
+            if result > 0:
+                QMessageBox.about(self, 'Ошибка', "Такой магазин уже существует")
+                return
+            cur = con.cursor()
+            que = f"""INSERT INTO markets (MarketName)
+                           VALUES ('{marketname}')"""
+            cur.execute(que)
+            con.commit()
+            print('inserted')
+            con.close()
+            self.load_data()
+        else:
+            con.close()
+            return
+
+class MarketPlacesWindow(QDialog, Ui_GoodDialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.modified = {}
+        self.goodtypes = {}
+        self.setModal(True)
+        self.titles = None
+        self.goodid = None
+        self.goodtypeid = None
+        self.load_data()
+        self.load_goodtypes()
+        self.tableWidgetGoods.itemSelectionChanged.connect(self.get_item)
+        self.tableWidgetGoods.itemClicked.connect(self.get_item)
+        self.cmbGoodType.currentTextChanged.connect(self.set_goodtypeid)
+        self.btnUpdate.clicked.connect(self.update_result)
+        self.btnSave.clicked.connect(self.save_results)
+        self.btnDelete.clicked.connect(self.delete_result)
+
+        # список продуктов
+
+    def set_goodtypeid(self):
+        self.goodtypeid = None
+        if self.goodtypes:
+            type = self.cmbGoodType.currentText()
+            self.goodtypeid = self.goodtypes.get(type, None)
+
+        # список типов продуктов
+
+    def load_goodtypes(self):
+
+        con = sqlite3.connect("data/my_market_db")
+        # Создание курсора
+        cur = con.cursor()
+
+        # Выполнение запроса и получение всех результатов
+        result = cur.execute("SELECT * FROM goodtypes").fetchall()
+
+        # Вывод результатов на экран
+        for elem in result:
+            self.cmbGoodType.addItem(elem[1])
+            self.goodtypes[elem[1]] = elem[0]
+
+        con.close()
+
+    def get_item(self):
+        self.goodid = None
+        k = self.tableWidgetGoods.currentItem().row()
+        if k:
+            self.goodid = int(self.tableWidgetGoods.item(k, 0).text())
+            self.lineEditGoodName.setText(self.tableWidgetGoods.item(k, 1).text())
+            self.cmbGoodType.setCurrentText(self.tableWidgetGoods.item(k, 2).text())
+        print(self.tableWidgetGoods.item(k, 0).text(), self.tableWidgetGoods.item(k, 1).text(),
+              self.tableWidgetGoods.item(k, 2).text())
+
+    def load_data(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+
+        result = cur.execute("""SELECT Goods.Id as id, Goods.GoodName as Название, GoodTypes.GoodTypeName as Категория 
+        from goods inner join GoodTypes on goods.GoodTypeId = goodtypes.Id """).fetchall()
+
+        self.tableWidgetGoods.setRowCount(len(result))
+
+        self.tableWidgetGoods.setColumnCount(len(result[0]))
+        self.titles = [description[0] for description in cur.description]
+        self.tableWidgetGoods.setHorizontalHeaderLabels(self.titles)
+        headers = self.tableWidgetGoods.horizontalHeader()
+        headers.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        headers.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        headers.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        # Заполнили таблицу полученными элементами
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                print(val, end='\t')
+                item = QTableWidgetItem(str(val))
+                item.setFlags(QtCore.Qt.ItemIsEnabled)
+                self.tableWidgetGoods.setItem(i, j, item)
+            print()
+        self.modified = {}
+
+        con.close()
+
+    def update_result(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+        if (self.lineEditGoodName.text()) and self.goodtypeid and self.goodid:
+            print(self.lineEditGoodName.text(), self.goodtypeid, self.goodid)
+            que = f"""UPDATE goods SET GoodName='{self.lineEditGoodName.text()}', 
+                          GoodTypeId={self.goodtypeid} WHERE Id= {self.goodid};"""
+            cur.execute(que)
+            con.commit()
+            print('updated')
+            self.load_data()
+            con.close()
+        else:
+            return
+
+    def delete_result(self, item):
+
+        if self.goodid:
+            print(self.lineEditGoodName.text(), self.goodtypeid)
+            ret = QMessageBox.question(self, '', "Вы действительно хотите удалить запись?",
+                                       QMessageBox.Yes | QMessageBox.No)
+
+            if ret == QMessageBox.Yes:
+                con = sqlite3.connect("data/my_market_db")
+                cur = con.cursor()
+                result = int(list(cur.execute(
+                    f"Select Count(GoodId) from GoodMarkets where GoodMarkets.GoodId = {self.goodid}"))[0][
+                                 0])
+                if result > 0:
+                    QMessageBox.critical(self, 'Ошибка', "есть связанные записи")
+                    return
+
+                que = f"""DELETE FROM Goods WHERE Id= {self.goodid};"""
+                cur.execute(que)
+                con.commit()
+                print('deleted')
+                con.close()
+                self.load_data()
+            else:
+                return
+
+    def save_results(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+
+        if (self.lineEditGoodName.text()) and self.goodtypeid:
+            print(self.lineEditGoodName.text(), self.goodtypeid)
+            goodname = self.lineEditGoodName.text()
+            result = int(list(cur.execute(
+                f"Select Count(GoodName) from Goods where goods.GoodName = '{self.lineEditGoodName.text()}'"))[0][0])
+            if result > 0:
+                QMessageBox.about(self, 'Ошибка', "Такой товар уже существует")
+                return
+            cur = con.cursor()
+            que = f"""INSERT INTO Goods (goodname, goodtypeid) 
+                           VALUES ('{goodname}',{self.goodtypeid})"""
+            cur.execute(que)
+            con.commit()
+            print('inserted')
+            con.close()
+            self.load_data()
+        else:
+            con.close()
+            return
+
+
+
+# Категории товаров
+class GoodTypeWindow(QDialog, Ui_GoodTypeDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Категории товаров")
+        self.setupUi(self)
+        self.modified = {}
+        self.goodtypes = {}
+        self.setModal(True)
+        self.titles = None
+        self.goodtypeid = None
+        self.load_data()
+        self.tableWidget.itemSelectionChanged.connect(self.get_item)
+        self.tableWidget.itemClicked.connect(self.get_item)
+        self.btnUpdate.clicked.connect(self.update_result)
+        self.btnSave.clicked.connect(self.save_results)
+        self.btnDelete.clicked.connect(self.delete_result)
+
+    def get_item(self):
+        self.goodtypeid = None
+        k = self.tableWidget.currentItem().row()
+        if k:
+            self.goodtypeid = int(self.tableWidget.item(k, 0).text())
+            self.lineEditName.setText(self.tableWidget.item(k, 1).text())
+        print(self.tableWidget.item(k, 0).text(), self.tableWidget.item(k, 1).text())
+
+    def load_data(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+
+        result = cur.execute("""SELECT GoodTypes.Id as id, GoodTypes.GoodTypeName as Категория From GoodTypes""").fetchall()
+
+        self.tableWidget.setRowCount(len(result))
+
+        self.tableWidget.setColumnCount(len(result[0]))
+        self.titles = [description[0] for description in cur.description]
+        self.tableWidget.setHorizontalHeaderLabels(self.titles)
+        headers = self.tableWidget.horizontalHeader()
+        headers.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        headers.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+
+        # Заполнили таблицу полученными элементами
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                print(val, end='\t')
+                item = QTableWidgetItem(str(val))
+                item.setFlags(QtCore.Qt.ItemIsEnabled)
+                self.tableWidget.setItem(i, j, item)
+            print()
+
+        con.close()
+
+    def update_result(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+        if (self.lineEditName.text()) and self.goodtypeid:
+            print(self.lineEditName.text(), self.goodtypeid)
+            que = f"""UPDATE GoodTypes SET GoodTypeName='{self.lineEditName.text()}'
+                           WHERE Id= {self.goodtypeid};"""
+            cur.execute(que)
+            con.commit()
+            print('updated')
+            self.load_data()
+            con.close()
+        else:
+            return
+
+    def delete_result(self):
+
+        if self.goodtypeid:
+            print(self.lineEditName.text(), self.goodtypeid)
+            ret = QMessageBox.question(self, '', "Вы действительно хотите удалить запись?",
+                                       QMessageBox.Yes | QMessageBox.No)
+
+            if ret == QMessageBox.Yes:
+                con = sqlite3.connect("data/my_market_db")
+                cur = con.cursor()
+                result = int(list(cur.execute(
+                    f"Select Count(GoodTypeId) from Goods where Goods.GoodTypeId = {self.goodtypeid}"))[0][
+                                 0])
+                if result > 0:
+                    QMessageBox.critical(self, 'Ошибка', "есть связанные записи")
+                    return
+
+                que = f"""DELETE FROM GoodTypes WHERE Id= {self.goodtypeid};"""
+                cur.execute(que)
+                con.commit()
+                print('deleted')
+                con.close()
+                self.load_data()
+            else:
+                return
+
+    def save_results(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+
+        if (self.lineEditName.text()):
+            print(self.lineEditName.text())
+            name = self.lineEditName.text()
+            result = int(list(cur.execute(
+                f"Select Count(GoodTypeName) from GoodTypes where GoodTypes.GoodTypeName = '{self.lineEditName.text()}'"))[0][0])
+            if result > 0:
+                QMessageBox.about(self, 'Ошибка', "Такая категория уже существует")
+                return
+            cur = con.cursor()
+            que = f"""INSERT INTO GoodTypes (GoodTypeName)
+                           VALUES ('{name}')"""
+            cur.execute(que)
+            con.commit()
+            print('inserted')
+            con.close()
+            self.load_data()
+        else:
+            con.close()
+            return
+
 
 
 def geocode(address):
@@ -814,14 +1214,10 @@ def get_nearest_object(point, kind):
     return features[0]["GeoObject"]["name"] if features else None
 
 
-
-
-
-
 def main():
     app = QApplication(sys.argv)
     ex = MyWidget()
-    #apply_stylesheet(app, theme='dark_cyan.xml')
+    apply_stylesheet(app, theme='dark_cyan.xml')
     ex.show()
     sys.exit(app.exec_())
 

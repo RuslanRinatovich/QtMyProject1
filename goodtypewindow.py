@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'goodwindow.ui'
+# Form implementation generated from reading ui file 'goodtypewindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.2
 #
@@ -8,45 +8,39 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_GoodDialog(object):
-    def setupUi(self, GoodDialog):
-        GoodDialog.setObjectName("GoodDialog")
-        GoodDialog.resize(723, 454)
+class Ui_GoodTypeDialog(object):
+    def setupUi(self, GoodTypeDialog):
+        GoodTypeDialog.setObjectName("GoodTypeDialog")
+        GoodTypeDialog.resize(723, 454)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("box.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        GoodDialog.setWindowIcon(icon)
-        self.gridLayout = QtWidgets.QGridLayout(GoodDialog)
+        icon.addPixmap(QtGui.QPixmap("categories.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        GoodTypeDialog.setWindowIcon(icon)
+        self.gridLayout = QtWidgets.QGridLayout(GoodTypeDialog)
         self.gridLayout.setObjectName("gridLayout")
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
-        self.tableWidgetGoods = QtWidgets.QTableWidget(GoodDialog)
-        self.tableWidgetGoods.setObjectName("tableWidgetGoods")
-        self.tableWidgetGoods.setColumnCount(0)
-        self.tableWidgetGoods.setRowCount(0)
-        self.verticalLayout.addWidget(self.tableWidgetGoods)
+        self.tableWidget = QtWidgets.QTableWidget(GoodTypeDialog)
+        self.tableWidget.setObjectName("tableWidget")
+        self.tableWidget.setColumnCount(0)
+        self.tableWidget.setRowCount(0)
+        self.verticalLayout.addWidget(self.tableWidget)
         self.formLayout = QtWidgets.QFormLayout()
         self.formLayout.setObjectName("formLayout")
-        self.label = QtWidgets.QLabel(GoodDialog)
+        self.label = QtWidgets.QLabel(GoodTypeDialog)
         self.label.setObjectName("label")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label)
-        self.lineEditGoodName = QtWidgets.QLineEdit(GoodDialog)
+        self.lineEditName = QtWidgets.QLineEdit(GoodTypeDialog)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEditGoodName.sizePolicy().hasHeightForWidth())
-        self.lineEditGoodName.setSizePolicy(sizePolicy)
-        self.lineEditGoodName.setObjectName("lineEditGoodName")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.lineEditGoodName)
-        self.label_2 = QtWidgets.QLabel(GoodDialog)
-        self.label_2.setObjectName("label_2")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_2)
-        self.cmbGoodType = QtWidgets.QComboBox(GoodDialog)
-        self.cmbGoodType.setObjectName("cmbGoodType")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.cmbGoodType)
+        sizePolicy.setHeightForWidth(self.lineEditName.sizePolicy().hasHeightForWidth())
+        self.lineEditName.setSizePolicy(sizePolicy)
+        self.lineEditName.setObjectName("lineEditName")
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.lineEditName)
         self.verticalLayout.addLayout(self.formLayout)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.btnSave = QtWidgets.QPushButton(GoodDialog)
+        self.btnSave = QtWidgets.QPushButton(GoodTypeDialog)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -54,7 +48,7 @@ class Ui_GoodDialog(object):
         self.btnSave.setSizePolicy(sizePolicy)
         self.btnSave.setObjectName("btnSave")
         self.horizontalLayout.addWidget(self.btnSave)
-        self.btnUpdate = QtWidgets.QPushButton(GoodDialog)
+        self.btnUpdate = QtWidgets.QPushButton(GoodTypeDialog)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -62,7 +56,7 @@ class Ui_GoodDialog(object):
         self.btnUpdate.setSizePolicy(sizePolicy)
         self.btnUpdate.setObjectName("btnUpdate")
         self.horizontalLayout.addWidget(self.btnUpdate)
-        self.btnDelete = QtWidgets.QPushButton(GoodDialog)
+        self.btnDelete = QtWidgets.QPushButton(GoodTypeDialog)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -73,15 +67,14 @@ class Ui_GoodDialog(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
 
-        self.retranslateUi(GoodDialog)
-        QtCore.QMetaObject.connectSlotsByName(GoodDialog)
+        self.retranslateUi(GoodTypeDialog)
+        QtCore.QMetaObject.connectSlotsByName(GoodTypeDialog)
 
-    def retranslateUi(self, GoodDialog):
+    def retranslateUi(self, GoodTypeDialog):
         _translate = QtCore.QCoreApplication.translate
-        GoodDialog.setWindowTitle(_translate("GoodDialog", "Товары"))
-        self.label.setText(_translate("GoodDialog", "Название товара"))
-        self.label_2.setText(_translate("GoodDialog", "Категория товара"))
-        self.btnSave.setText(_translate("GoodDialog", "Добавить"))
-        self.btnUpdate.setText(_translate("GoodDialog", "Изменить"))
-        self.btnDelete.setText(_translate("GoodDialog", "Удалить"))
+        GoodTypeDialog.setWindowTitle(_translate("GoodTypeDialog", "Категории товаров"))
+        self.label.setText(_translate("GoodTypeDialog", "Категория"))
+        self.btnSave.setText(_translate("GoodTypeDialog", "Добавить"))
+        self.btnUpdate.setText(_translate("GoodTypeDialog", "Изменить"))
+        self.btnDelete.setText(_translate("GoodTypeDialog", "Удалить"))
 

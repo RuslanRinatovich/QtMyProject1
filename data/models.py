@@ -38,16 +38,16 @@ class GoodMarket:
 
 
 class Market:
-    def __init__(self, id, marketname, logo):
+    def __init__(self, id, marketname):
         self.id = id
         self.marketname = marketname
-        self.logo = logo
+
 
     def __repr__(self):
-        return f"{self.id} {self.marketname} {self.logo}"
+        return f"{self.id} {self.marketname} "
 
     def __str__(self):
-        return f"{self.id} {self.marketname} {self.logo}"
+        return f"{self.id} {self.marketname} "
 
 
 class MarketPlace:

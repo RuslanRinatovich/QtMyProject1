@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>GoodDialog</class>
- <widget class="QDialog" name="GoodDialog">
+ <class>GoodTypeDialog</class>
+ <widget class="QDialog" name="GoodTypeDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,29 +11,29 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Товары</string>
+   <string>Категории товаров</string>
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>box.ico</normaloff>box.ico</iconset>
+    <normaloff>categories.ico</normaloff>categories.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QTableWidget" name="tableWidgetGoods"/>
+      <widget class="QTableWidget" name="tableWidget"/>
      </item>
      <item>
       <layout class="QFormLayout" name="formLayout">
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Название товара</string>
+          <string>Категория</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEditGoodName">
+        <widget class="QLineEdit" name="lineEditName">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -41,16 +41,6 @@
           </sizepolicy>
          </property>
         </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Категория товара</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QComboBox" name="cmbGoodType"/>
        </item>
       </layout>
      </item>
