@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'marketplacewindow.ui'
+# Form implementation generated from reading ui file 'goodmarketwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.2
 #
@@ -8,45 +8,47 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_MarketPlaceDialog(object):
-    def setupUi(self, MarketPlaceDialog):
-        MarketPlaceDialog.setObjectName("MarketPlaceDialog")
-        MarketPlaceDialog.resize(723, 454)
+class Ui_GoodMarketDialog(object):
+    def setupUi(self, GoodMarketDialog):
+        GoodMarketDialog.setObjectName("GoodMarketDialog")
+        GoodMarketDialog.resize(723, 454)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("location.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        MarketPlaceDialog.setWindowIcon(icon)
-        self.gridLayout = QtWidgets.QGridLayout(MarketPlaceDialog)
+        GoodMarketDialog.setWindowIcon(icon)
+        self.gridLayout = QtWidgets.QGridLayout(GoodMarketDialog)
         self.gridLayout.setObjectName("gridLayout")
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
-        self.tableWidget = QtWidgets.QTableWidget(MarketPlaceDialog)
+        self.tableWidget = QtWidgets.QTableWidget(GoodMarketDialog)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
         self.verticalLayout.addWidget(self.tableWidget)
         self.formLayout = QtWidgets.QFormLayout()
         self.formLayout.setObjectName("formLayout")
-        self.label = QtWidgets.QLabel(MarketPlaceDialog)
+        self.label = QtWidgets.QLabel(GoodMarketDialog)
         self.label.setObjectName("label")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label)
-        self.lineEditAddress = QtWidgets.QLineEdit(MarketPlaceDialog)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEditAddress.sizePolicy().hasHeightForWidth())
-        self.lineEditAddress.setSizePolicy(sizePolicy)
-        self.lineEditAddress.setObjectName("lineEditAddress")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.lineEditAddress)
-        self.label_2 = QtWidgets.QLabel(MarketPlaceDialog)
+        self.cmbMarketPlaces = QtWidgets.QComboBox(GoodMarketDialog)
+        self.cmbMarketPlaces.setObjectName("cmbMarketPlaces")
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.cmbMarketPlaces)
+        self.label_2 = QtWidgets.QLabel(GoodMarketDialog)
         self.label_2.setObjectName("label_2")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_2)
-        self.cmbMarket = QtWidgets.QComboBox(MarketPlaceDialog)
-        self.cmbMarket.setObjectName("cmbMarket")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.cmbMarket)
+        self.cmbGoods = QtWidgets.QComboBox(GoodMarketDialog)
+        self.cmbGoods.setObjectName("cmbGoods")
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.cmbGoods)
+        self.label_3 = QtWidgets.QLabel(GoodMarketDialog)
+        self.label_3.setObjectName("label_3")
+        self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_3)
+        self.spinBoxPrice = QtWidgets.QDoubleSpinBox(GoodMarketDialog)
+        self.spinBoxPrice.setMaximum(10000000.0)
+        self.spinBoxPrice.setObjectName("spinBoxPrice")
+        self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.spinBoxPrice)
         self.verticalLayout.addLayout(self.formLayout)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.btnSave = QtWidgets.QPushButton(MarketPlaceDialog)
+        self.btnSave = QtWidgets.QPushButton(GoodMarketDialog)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -54,7 +56,7 @@ class Ui_MarketPlaceDialog(object):
         self.btnSave.setSizePolicy(sizePolicy)
         self.btnSave.setObjectName("btnSave")
         self.horizontalLayout.addWidget(self.btnSave)
-        self.btnUpdate = QtWidgets.QPushButton(MarketPlaceDialog)
+        self.btnUpdate = QtWidgets.QPushButton(GoodMarketDialog)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -62,7 +64,7 @@ class Ui_MarketPlaceDialog(object):
         self.btnUpdate.setSizePolicy(sizePolicy)
         self.btnUpdate.setObjectName("btnUpdate")
         self.horizontalLayout.addWidget(self.btnUpdate)
-        self.btnDelete = QtWidgets.QPushButton(MarketPlaceDialog)
+        self.btnDelete = QtWidgets.QPushButton(GoodMarketDialog)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -73,15 +75,16 @@ class Ui_MarketPlaceDialog(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
 
-        self.retranslateUi(MarketPlaceDialog)
-        QtCore.QMetaObject.connectSlotsByName(MarketPlaceDialog)
+        self.retranslateUi(GoodMarketDialog)
+        QtCore.QMetaObject.connectSlotsByName(GoodMarketDialog)
 
-    def retranslateUi(self, MarketPlaceDialog):
+    def retranslateUi(self, GoodMarketDialog):
         _translate = QtCore.QCoreApplication.translate
-        MarketPlaceDialog.setWindowTitle(_translate("MarketPlaceDialog", "Адреса магазинов"))
-        self.label.setText(_translate("MarketPlaceDialog", "Адрес магазина"))
-        self.label_2.setText(_translate("MarketPlaceDialog", "Торговая сеть"))
-        self.btnSave.setText(_translate("MarketPlaceDialog", "Добавить"))
-        self.btnUpdate.setText(_translate("MarketPlaceDialog", "Изменить"))
-        self.btnDelete.setText(_translate("MarketPlaceDialog", "Удалить"))
+        GoodMarketDialog.setWindowTitle(_translate("GoodMarketDialog", "Товары в магазинах"))
+        self.label.setText(_translate("GoodMarketDialog", "Адрес магазина"))
+        self.label_2.setText(_translate("GoodMarketDialog", "Товар"))
+        self.label_3.setText(_translate("GoodMarketDialog", "Стоимость"))
+        self.btnSave.setText(_translate("GoodMarketDialog", "Добавить"))
+        self.btnUpdate.setText(_translate("GoodMarketDialog", "Изменить"))
+        self.btnDelete.setText(_translate("GoodMarketDialog", "Удалить"))
 

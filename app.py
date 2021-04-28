@@ -15,6 +15,7 @@ from goodwindow import Ui_GoodDialog
 from marketwindow import Ui_MarketDialog
 from goodtypewindow import Ui_GoodTypeDialog
 from marketplacewindow import Ui_MarketPlaceDialog
+from goodmarketwindow import Ui_GoodMarketDialog
 from qt_material import apply_stylesheet
 from data.models import User, Good, GoodMarket, GoodType, Market, MarketPlace
 
@@ -148,15 +149,26 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         # self.ui.mnuGoods.triggered.connect(self.open_good_window)
         openGoodsAction = QAction("Товары", self)
         openGoodsAction.triggered.connect(self.open_good_window)
+        self.ui.mnuGoods.addAction(openGoodsAction)
         openGoodTypesAction = QAction("Категории", self)
         openGoodTypesAction.triggered.connect(self.open_good_type_window)
-        self.ui.mnuGoods.addAction(openGoodsAction)
+
         self.ui.mnuGoods.addAction(openGoodTypesAction)
+
+        openGoodMarketsAction = QAction("Точки продаж", self)
+        openGoodMarketsAction.triggered.connect(self.open_good_market_window)
+
+        self.ui.mnuGoods.addAction(openGoodMarketsAction)
 
         openMarketsAction = QAction('Магазины', self)
         openMarketsAction.triggered.connect(self.open_market_window)
 
         self.ui.mnuMarkets.addAction(openMarketsAction)
+
+        openAddressAction = QAction('Адреса', self)
+        openAddressAction.triggered.connect(self.open_address_window)
+
+        self.ui.mnuMarkets.addAction(openAddressAction)
         self.load_goods()
         self.load_market_places()
         # self.open_good_window()
@@ -164,16 +176,26 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
     def open_good_window(self):
         self.new_form = GoodWindow()
         self.new_form.show()
+        #self.load_goods()
 
     def open_good_type_window(self):
         self.new_form = GoodTypeWindow()
         self.new_form.show()
+        #self.load_goodtypes()
 
     def open_market_window(self):
         self.new_form = MarketWindow()
         self.new_form.show()
+        #self.load_markets()
 
+    def open_address_window(self):
+        self.new_form = MarketPlacesWindow()
+        self.new_form.show()
+        #self.load_market_places()
 
+    def open_good_market_window(self):
+        self.new_form = GoodMarketWindow()
+        self.new_form.show()
 
     def show_market(self):
         # self.new_form = GoodWindow()
@@ -402,6 +424,7 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
 
     # список магазинов
     def load_markets(self):
+        #self.ui.cmbMarkets.clear()
         self.marketplaceid = None
         con = sqlite3.connect("data/my_market_db")
         # Создание курсора
@@ -424,6 +447,7 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
     # список типов продуктов
     def load_goodtypes(self):
         self.goodtypes = []
+        #self.ui.cmbGoodTypes.clear()
         con = sqlite3.connect("data/my_market_db")
         # Создание курсора
         cur = con.cursor()
@@ -814,74 +838,74 @@ class MarketWindow(QDialog, Ui_MarketDialog):
             con.close()
             return
 
-class MarketPlacesWindow(QDialog, Ui_GoodDialog):
+class MarketPlacesWindow(QDialog, Ui_MarketPlaceDialog):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.modified = {}
-        self.goodtypes = {}
+        self.markets = {}
         self.setModal(True)
         self.titles = None
-        self.goodid = None
-        self.goodtypeid = None
+        self.marketplaceid = None
+        self.marketid = None
         self.load_data()
-        self.load_goodtypes()
-        self.tableWidgetGoods.itemSelectionChanged.connect(self.get_item)
-        self.tableWidgetGoods.itemClicked.connect(self.get_item)
-        self.cmbGoodType.currentTextChanged.connect(self.set_goodtypeid)
+        self.load_markets()
+        self.tableWidget.itemSelectionChanged.connect(self.get_item)
+        self.tableWidget.itemClicked.connect(self.get_item)
+        self.cmbMarket.currentTextChanged.connect(self.set_marketid)
         self.btnUpdate.clicked.connect(self.update_result)
         self.btnSave.clicked.connect(self.save_results)
         self.btnDelete.clicked.connect(self.delete_result)
 
         # список продуктов
 
-    def set_goodtypeid(self):
-        self.goodtypeid = None
-        if self.goodtypes:
-            type = self.cmbGoodType.currentText()
-            self.goodtypeid = self.goodtypes.get(type, None)
+    def set_marketid(self):
+        self.marketid = None
+        if self.markets:
+            type = self.cmbMarket.currentText()
+            self.marketid = self.markets.get(type, None)
 
         # список типов продуктов
 
-    def load_goodtypes(self):
+    def load_markets(self):
 
         con = sqlite3.connect("data/my_market_db")
         # Создание курсора
         cur = con.cursor()
 
         # Выполнение запроса и получение всех результатов
-        result = cur.execute("SELECT * FROM goodtypes").fetchall()
+        result = cur.execute("SELECT * FROM markets").fetchall()
 
         # Вывод результатов на экран
         for elem in result:
-            self.cmbGoodType.addItem(elem[1])
-            self.goodtypes[elem[1]] = elem[0]
+            self.cmbMarket.addItem(elem[1])
+            self.markets[elem[1]] = elem[0]
 
         con.close()
 
     def get_item(self):
-        self.goodid = None
-        k = self.tableWidgetGoods.currentItem().row()
-        if k:
-            self.goodid = int(self.tableWidgetGoods.item(k, 0).text())
-            self.lineEditGoodName.setText(self.tableWidgetGoods.item(k, 1).text())
-            self.cmbGoodType.setCurrentText(self.tableWidgetGoods.item(k, 2).text())
-        print(self.tableWidgetGoods.item(k, 0).text(), self.tableWidgetGoods.item(k, 1).text(),
-              self.tableWidgetGoods.item(k, 2).text())
+        self.marketplaceid = None
+        k = self.tableWidget.currentItem().row()
+        if k != None:
+            self.marketplaceid = int(self.tableWidget.item(k, 0).text())
+            self.lineEditAddress.setText(self.tableWidget.item(k, 2).text())
+            self.cmbMarket.setCurrentText(self.tableWidget.item(k, 1).text())
+        print(self.tableWidget.item(k, 0).text(), self.tableWidget.item(k, 1).text(),
+              self.tableWidget.item(k, 2).text())
 
     def load_data(self):
         con = sqlite3.connect("data/my_market_db")
         cur = con.cursor()
 
-        result = cur.execute("""SELECT Goods.Id as id, Goods.GoodName as Название, GoodTypes.GoodTypeName as Категория 
-        from goods inner join GoodTypes on goods.GoodTypeId = goodtypes.Id """).fetchall()
+        result = cur.execute("""SELECT MarketPlaces.Id as id, Markets.MarketName as Магазин, MarketPlaces.Address as Адрес 
+        from MarketPlaces inner join Markets on MarketPlaces.MarketId = Markets.Id """).fetchall()
 
-        self.tableWidgetGoods.setRowCount(len(result))
+        self.tableWidget.setRowCount(len(result))
 
-        self.tableWidgetGoods.setColumnCount(len(result[0]))
+        self.tableWidget.setColumnCount(len(result[0]))
         self.titles = [description[0] for description in cur.description]
-        self.tableWidgetGoods.setHorizontalHeaderLabels(self.titles)
-        headers = self.tableWidgetGoods.horizontalHeader()
+        self.tableWidget.setHorizontalHeaderLabels(self.titles)
+        headers = self.tableWidget.horizontalHeader()
         headers.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         headers.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         headers.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
@@ -891,7 +915,7 @@ class MarketPlacesWindow(QDialog, Ui_GoodDialog):
                 print(val, end='\t')
                 item = QTableWidgetItem(str(val))
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
-                self.tableWidgetGoods.setItem(i, j, item)
+                self.tableWidget.setItem(i, j, item)
             print()
         self.modified = {}
 
@@ -900,10 +924,10 @@ class MarketPlacesWindow(QDialog, Ui_GoodDialog):
     def update_result(self):
         con = sqlite3.connect("data/my_market_db")
         cur = con.cursor()
-        if (self.lineEditGoodName.text()) and self.goodtypeid and self.goodid:
-            print(self.lineEditGoodName.text(), self.goodtypeid, self.goodid)
-            que = f"""UPDATE goods SET GoodName='{self.lineEditGoodName.text()}', 
-                          GoodTypeId={self.goodtypeid} WHERE Id= {self.goodid};"""
+        if (self.lineEditAddress.text()) and self.marketid and self.marketplaceid:
+            print(self.lineEditAddress.text(), self.marketid, self.marketplaceid)
+            que = f"""UPDATE MarketPlaces SET Address='{self.lineEditAddress.text()}', 
+                          MarketId={self.marketid} WHERE Id= {self.marketplaceid};"""
             cur.execute(que)
             con.commit()
             print('updated')
@@ -912,10 +936,10 @@ class MarketPlacesWindow(QDialog, Ui_GoodDialog):
         else:
             return
 
-    def delete_result(self, item):
+    def delete_result(self):
 
-        if self.goodid:
-            print(self.lineEditGoodName.text(), self.goodtypeid)
+        if self.marketplaceid:
+            print(self.lineEditAddress.text(), self.marketid)
             ret = QMessageBox.question(self, '', "Вы действительно хотите удалить запись?",
                                        QMessageBox.Yes | QMessageBox.No)
 
@@ -923,13 +947,13 @@ class MarketPlacesWindow(QDialog, Ui_GoodDialog):
                 con = sqlite3.connect("data/my_market_db")
                 cur = con.cursor()
                 result = int(list(cur.execute(
-                    f"Select Count(GoodId) from GoodMarkets where GoodMarkets.GoodId = {self.goodid}"))[0][
+                    f"Select Count(MarketPlaceId) from GoodMarkets where GoodMarkets.MarketPlaceId = {self.marketplaceid}"))[0][
                                  0])
                 if result > 0:
                     QMessageBox.critical(self, 'Ошибка', "есть связанные записи")
                     return
 
-                que = f"""DELETE FROM Goods WHERE Id= {self.goodid};"""
+                que = f"""DELETE FROM GoodMarkets WHERE Id= {self.marketplaceid};"""
                 cur.execute(que)
                 con.commit()
                 print('deleted')
@@ -942,17 +966,18 @@ class MarketPlacesWindow(QDialog, Ui_GoodDialog):
         con = sqlite3.connect("data/my_market_db")
         cur = con.cursor()
 
-        if (self.lineEditGoodName.text()) and self.goodtypeid:
-            print(self.lineEditGoodName.text(), self.goodtypeid)
-            goodname = self.lineEditGoodName.text()
+        if (self.lineEditAddress.text()) and self.marketid:
+            print(self.lineEditAddress.text(), self.marketid)
+            name = self.lineEditAddress.text()
             result = int(list(cur.execute(
-                f"Select Count(GoodName) from Goods where goods.GoodName = '{self.lineEditGoodName.text()}'"))[0][0])
+                f"""Select Count(Address) from MarketPlaces 
+                where MarketPlaces.Address = '{self.lineEditAddress.text()}' and MarketPlaces.MarketId ={self.marketid}"""))[0][0])
             if result > 0:
-                QMessageBox.about(self, 'Ошибка', "Такой товар уже существует")
+                QMessageBox.about(self, 'Ошибка', "Такой адрес для данного магазина уже существует")
                 return
             cur = con.cursor()
-            que = f"""INSERT INTO Goods (goodname, goodtypeid) 
-                           VALUES ('{goodname}',{self.goodtypeid})"""
+            que = f"""INSERT INTO MarketPlaces (marketid, address) 
+                           VALUES ({self.marketid},'{name}')"""
             cur.execute(que)
             con.commit()
             print('inserted')
@@ -962,7 +987,209 @@ class MarketPlacesWindow(QDialog, Ui_GoodDialog):
             con.close()
             return
 
+# товары в магазинах
+class GoodMarketWindow(QDialog, Ui_GoodMarketDialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.modified = {}
+        self.marketplaces = {}
+        self.goods = {}
+        self.setModal(True)
+        self.titles = None
+        self.goodid = None
+        self.marketplaceid = None
+        self.goodmarketid = None
+        self.marketid = None
+        self.load_data()
+        self.load_market_places()
+        self.load_goods()
+        self.tableWidget.itemSelectionChanged.connect(self.get_item)
+        self.tableWidget.itemClicked.connect(self.get_item)
+        self.cmbGoods.currentTextChanged.connect(self.set_goodid)
+        self.cmbMarketPlaces.currentTextChanged.connect(self.set_marketplaceid)
+        self.btnUpdate.clicked.connect(self.update_result)
+        self.btnSave.clicked.connect(self.save_results)
+        self.btnDelete.clicked.connect(self.delete_result)
 
+        # список продуктов
+
+    def set_goodid(self):
+        self.goodid = None
+        if self.goods:
+            type = self.cmbGoods.currentText()
+            self.goodid = self.goods.get(type, None)
+
+    def set_marketplaceid(self):
+        self.marketplaceid = None
+        if self.marketplaces:
+            type = self.cmbMarketPlaces.currentText()
+            self.marketplaceid = self.marketplaces.get(type, None)
+
+        # список типов продуктов
+
+    def load_market_places(self):
+
+        con = sqlite3.connect("data/my_market_db")
+        # Создание курсора
+        cur = con.cursor()
+
+        # Выполнение запроса и получение всех результатов
+        result = cur.execute("""SELECT MarketPlaces.Id,
+         MarketPlaces.Address,
+          Markets.MarketName FROM markets inner join marketplaces on MarketPlaces.MarketId = Markets.Id""").fetchall()
+
+        # Вывод результатов на экран
+        for elem in result:
+            m = f"{elem[2]} ({elem[1]})"
+            print(m)
+            self.cmbMarketPlaces.addItem(m)
+            self.marketplaces[m] = elem[0]
+
+        con.close()
+
+
+    def load_goods(self):
+        con = sqlite3.connect("data/my_market_db")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        result = cur.execute("""SELECT * from goods""").fetchall()
+        # Вывод результатов на экран
+        for elem in result:
+
+            self.cmbGoods.addItem(elem[1])
+            self.goods[elem[1]] = elem[0]
+
+        con.close()
+
+    def get_item(self):
+        self.goodmarketid = None
+        k = self.tableWidget.currentItem().row()
+        if k != None:
+            self.goodmarketid = int(self.tableWidget.item(k, 0).text())
+            self.cmbGoods.setCurrentText(self.tableWidget.item(k, 2).text())
+            market = f"{self.tableWidget.item(k, 4).text()} ({self.tableWidget.item(k, 5).text()})"
+            self.cmbMarketPlaces.setCurrentText(market)
+            self.spinBoxPrice.setValue(float(self.tableWidget.item(k, 6).text()))
+        print(self.tableWidget.item(k, 0).text(), self.tableWidget.item(k, 2).text(),
+              market)
+
+    def load_data(self):
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+
+        result = cur.execute("""SELECT GoodMarkets.Id, 
+    GoodMarkets.GoodId, 
+    Goods.GoodName, 
+    GoodMarkets.MarketPlaceId, 
+    Markets.MarketName,
+     MarketPlaces.Address, 
+     GoodMarkets.Price from 
+    (Goods inner join GoodMarkets on Goods.Id == GoodMarkets.GoodId)  
+    inner join  (MarketPlaces inner join Markets on MarketPlaces.MarketId = Markets.Id) 
+    on  GoodMarkets.MarketPlaceId == MarketPlaces.Id""").fetchall()
+
+        self.tableWidget.setRowCount(len(result))
+
+        self.tableWidget.setColumnCount(len(result[0]))
+        self.titles = [description[0] for description in cur.description]
+        self.tableWidget.setHorizontalHeaderLabels(self.titles)
+        headers = self.tableWidget.horizontalHeader()
+        headers.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        self.tableWidget.setColumnHidden(1, True)
+        headers.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        self.tableWidget.setColumnHidden(3, True)
+        headers.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
+        headers.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
+        headers.setSectionResizeMode(6, QtWidgets.QHeaderView.Stretch)
+
+        # Заполнили таблицу полученными элементами
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                print(val, end='\t')
+                item = QTableWidgetItem(str(val))
+                item.setFlags(QtCore.Qt.ItemIsEnabled)
+                self.tableWidget.setItem(i, j, item)
+            print()
+
+        con.close()
+
+    def update_result(self):
+
+        con = sqlite3.connect("data/my_market_db")
+        cur = con.cursor()
+        if self.goodid and self.marketplaceid and self.goodmarketid:
+            print(self.goodid, self.marketplaceid)
+            price = float(self.spinBoxPrice.value())
+            # result = int(list(cur.execute(
+            #         f"""Select Count(Id) from GoodMarkets where GoodMarkets.MarketPlaceId = {self.marketplaceid}
+            #             and GoodMarkets.GoodId = {self.goodid} and GoodMarkets.Price = {}"""))[0][0])
+            # if result > 0:
+            #     QMessageBox.critical(self, 'Ошибка', "товар поц")
+            #     return
+
+            que = f"""UPDATE GoodMarkets SET GoodId={self.goodid},
+                          MarketPlaceId={self.marketplaceid}, Price = {price}  WHERE Id= {self.goodmarketid};"""
+            cur.execute(que)
+            con.commit()
+            print('updated')
+            self.load_data()
+            con.close()
+        else:
+            return
+
+    def delete_result(self):
+        pass
+        # if self.marketplaceid:
+        #     print(self.lineEditAddress.text(), self.marketid)
+        #     ret = QMessageBox.question(self, '', "Вы действительно хотите удалить запись?",
+        #                                QMessageBox.Yes | QMessageBox.No)
+        #
+        #     if ret == QMessageBox.Yes:
+        #         con = sqlite3.connect("data/my_market_db")
+        #         cur = con.cursor()
+        #         result = int(list(cur.execute(
+        #             f"Select Count(MarketPlaceId) from GoodMarkets where GoodMarkets.MarketPlaceId = {self.marketplaceid}"))[0][
+        #                          0])
+        #         if result > 0:
+        #             QMessageBox.critical(self, 'Ошибка', "есть связанные записи")
+        #             return
+        #
+        #         que = f"""DELETE FROM GoodMarkets WHERE Id= {self.marketplaceid};"""
+        #         cur.execute(que)
+        #         con.commit()
+        #         print('deleted')
+        #         con.close()
+        #         self.load_data()
+        #     else:
+        #         return
+
+    def save_results(self):
+        pass
+        # con = sqlite3.connect("data/my_market_db")
+        # cur = con.cursor()
+        #
+        # if (self.lineEditAddress.text()) and self.marketid:
+        #     print(self.lineEditAddress.text(), self.marketid)
+        #     name = self.lineEditAddress.text()
+        #     result = int(list(cur.execute(
+        #         f"""Select Count(Address) from MarketPlaces
+        #         where MarketPlaces.Address = '{self.lineEditAddress.text()}' and MarketPlaces.MarketId ={self.marketid}"""))[0][0])
+        #     if result > 0:
+        #         QMessageBox.about(self, 'Ошибка', "Такой адрес для данного магазина уже существует")
+        #         return
+        #     cur = con.cursor()
+        #     que = f"""INSERT INTO MarketPlaces (marketid, address)
+        #                    VALUES ({self.marketid},'{name}')"""
+        #     cur.execute(que)
+        #     con.commit()
+        #     print('inserted')
+        #     con.close()
+        #     self.load_data()
+        # else:
+        #     con.close()
+        #     return
 
 # Категории товаров
 class GoodTypeWindow(QDialog, Ui_GoodTypeDialog):
