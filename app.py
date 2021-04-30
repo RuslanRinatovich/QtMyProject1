@@ -74,19 +74,6 @@ class MyWidget(QMainWindow, Ui_Form):
             QMessageBox.about(self, 'Оповещение', "Ошибка подключения")
    
 
-
-class SecondForm(QWidget):
-    def __init__(self, *args):
-        super().__init__()
-        self.initUI(args)
-
-    def initUI(self, args):
-        self.setGeometry(300, 300, 300, 300)
-        self.setWindowTitle('Вторая форма')
-        self.lbl = QLabel(args[-1], self)
-        self.lbl.adjustSize()
-
-
 class MainWindowPage(QMainWindow, Ui_MainWindow):
     def __init__(self, *args):
         super().__init__()
@@ -120,7 +107,7 @@ class MainWindowPage(QMainWindow, Ui_MainWindow):
         self.goodtypeid = None
         self.address = None
 
-        # self.show_map(get_ll_span("Зеленодольск, ул.Карла-Маркса, 7"))
+        self.show_map(get_ll_span("Зеленодольск, ул.Карла-Маркса, 7"))
         self.ui.cmbGoodTypes.currentTextChanged.connect(self.load_goods)
         self.ui.cmbMarkets.currentTextChanged.connect(self.load_market_places)
         self.ui.btnSearch.clicked.connect(self.search_goods)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'AuthPage.ui'
+# Form implementation generated from reading ui file 'windows\AuthPage.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.2
 #
@@ -22,22 +22,19 @@ class Ui_Form(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("key.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Form.setWindowIcon(icon)
-        self.widget = QtWidgets.QWidget(Form)
-        self.widget.setGeometry(QtCore.QRect(10, 10, 251, 221))
-        self.widget.setObjectName("widget")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.widget)
+        self.layoutWidget = QtWidgets.QWidget(Form)
+        self.layoutWidget.setGeometry(QtCore.QRect(10, 10, 251, 221))
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.lineEditLogin = QtWidgets.QLineEdit(self.widget)
+        self.lineEditLogin = QtWidgets.QLineEdit(self.layoutWidget)
         self.lineEditLogin.setObjectName("lineEditLogin")
         self.verticalLayout.addWidget(self.lineEditLogin)
-        self.lineEditPassword = QtWidgets.QLineEdit(self.widget)
+        self.lineEditPassword = QtWidgets.QLineEdit(self.layoutWidget)
         self.lineEditPassword.setObjectName("lineEditPassword")
         self.verticalLayout.addWidget(self.lineEditPassword)
-        self.btnRegs = QtWidgets.QPushButton(self.widget)
-        self.btnRegs.setObjectName("btnRegs")
-        self.verticalLayout.addWidget(self.btnRegs)
-        self.btnAuth = QtWidgets.QPushButton(self.widget)
+        self.btnAuth = QtWidgets.QPushButton(self.layoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -45,6 +42,9 @@ class Ui_Form(object):
         self.btnAuth.setSizePolicy(sizePolicy)
         self.btnAuth.setObjectName("btnAuth")
         self.verticalLayout.addWidget(self.btnAuth)
+        self.btnRegs = QtWidgets.QPushButton(self.layoutWidget)
+        self.btnRegs.setObjectName("btnRegs")
+        self.verticalLayout.addWidget(self.btnRegs)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -54,6 +54,6 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", "Войти"))
         self.lineEditLogin.setPlaceholderText(_translate("Form", "Login"))
         self.lineEditPassword.setPlaceholderText(_translate("Form", "Password"))
-        self.btnRegs.setText(_translate("Form", "Регистрация"))
         self.btnAuth.setText(_translate("Form", "Войти"))
+        self.btnRegs.setText(_translate("Form", "Регистрация"))
 

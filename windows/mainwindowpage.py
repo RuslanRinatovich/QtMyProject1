@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MainWindowPage.ui'
+# Form implementation generated from reading ui file 'windows\MainWindowPage.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.2
 #
@@ -12,6 +12,9 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1000, 725)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("../book.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_4 = QtWidgets.QGridLayout(self.centralwidget)
@@ -67,19 +70,6 @@ class Ui_MainWindow(object):
         self.listWidgetPrices.setObjectName("listWidgetPrices")
         self.btnShowMarket = QtWidgets.QPushButton(self.splitter_6)
         self.btnShowMarket.setObjectName("btnShowMarket")
-        self.label = QtWidgets.QLabel(self.splitter_6)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
-        self.label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
-        self.label.setObjectName("label")
-        self.spinBoxScale = QtWidgets.QSpinBox(self.splitter_6)
-        self.spinBoxScale.setMinimum(1)
-        self.spinBoxScale.setMaximum(17)
-        self.spinBoxScale.setProperty("value", 10)
-        self.spinBoxScale.setObjectName("spinBoxScale")
         self.image = QtWidgets.QLabel(self.splitter_7)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -108,13 +98,12 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Справочнк покупателя"))
         self.groupBox.setTitle(_translate("MainWindow", "Продукты"))
         self.label_4.setText(_translate("MainWindow", "Категория"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Магазины"))
         self.btnSearch.setText(_translate("MainWindow", "Найти"))
         self.btnShowMarket.setText(_translate("MainWindow", "Показать на карте"))
-        self.label.setText(_translate("MainWindow", "Масштаб"))
         self.image.setText(_translate("MainWindow", "TextLabel"))
         self.mnuGoods.setTitle(_translate("MainWindow", "Товары"))
         self.mnuMarkets.setTitle(_translate("MainWindow", "Магазины"))

@@ -35,7 +35,7 @@
    <iconset>
     <normaloff>key.ico</normaloff>key.ico</iconset>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -60,13 +60,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="btnRegs">
-      <property name="text">
-       <string>Регистрация</string>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QPushButton" name="btnAuth">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -76,6 +69,13 @@
       </property>
       <property name="text">
        <string>Войти</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btnRegs">
+      <property name="text">
+       <string>Регистрация</string>
       </property>
      </widget>
     </item>
