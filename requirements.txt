@@ -1,0 +1,4 @@
+PyQt5 == 5.15.4
+qt-material == 2.8.6
+requests == 2.19.1
+werkzeug >= 0.14.1
